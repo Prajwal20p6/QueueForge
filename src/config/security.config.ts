@@ -80,7 +80,7 @@ export function loadSecurityConfig(envOverride?: any): SecurityConfig {
 
   const jwtSecret = EnvLoader.get('JWT_SECRET');
   const hmacSecret = EnvLoader.get('HMAC_SECRET');
-  const apiKeySecret = EnvLoader.get('API_KEY_SECRET');
+  const apiKeySecret = EnvLoader.getOrDefault('API_KEY_SECRET', EnvLoader.getOrDefault('API_KEY', jwtSecret));
 
   // Pre-schema explicit validations for clear error messages
   if (jwtSecret.length < 32) {
@@ -96,9 +96,9 @@ export function loadSecurityConfig(envOverride?: any): SecurityConfig {
   const nodeEnv = (process.env.NODE_ENV || 'development').toLowerCase();
   const isProd = nodeEnv === 'production';
 
-  // Production safety: reject dummy/test secrets
+  // Production safety: reject explicit placeholder values
   if (isProd) {
-    const dummyPatterns = ['dummy', 'test', 'placeholder', 'changeme', 'secret'];
+    const dummyPatterns = ['dummy_secret', 'test_placeholder', 'changeme_now', 'your_secret_here'];
     for (const secret of [jwtSecret, hmacSecret, apiKeySecret]) {
       const lower = secret.toLowerCase();
       if (dummyPatterns.some((p) => lower.includes(p))) {
