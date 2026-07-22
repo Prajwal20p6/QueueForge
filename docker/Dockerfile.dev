@@ -1,7 +1,7 @@
 # ──────────────────────────────────────────────────────────────────────────────
 # Development Containerization File
 # ──────────────────────────────────────────────────────────────────────────────
-FROM node:20-alpine
+FROM node:26-alpine
 
 # Install development system utility tools (postgresql client for interactive db check, curl)
 RUN apk add --no-cache libc6-compat openssl postgresql-client curl bash
