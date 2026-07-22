@@ -27,7 +27,7 @@
     "build": "tsc -p tsconfig.build.json",
     "postinstall": "prisma generate",
     "start": "node dist/index.js",
-    "start:prod": "npx prisma db push --skip-generate && node dist/index.js",
+    "start:prod": "npx prisma db push && node dist/index.js",
     "test": "jest --runInBand --detectOpenHandles",
     "test:unit": "jest --testPathPattern=tests/unit --runInBand",
     "test:integration": "jest --testPathPattern=tests/integration --runInBand",
