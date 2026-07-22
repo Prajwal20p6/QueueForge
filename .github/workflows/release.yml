@@ -51,7 +51,7 @@ jobs:
           # docker build -t queueforge:${{ github.event.inputs.version }} -f docker/Dockerfile .
 
       - name: Construct GitHub Release Notes
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: "v${{ github.event.inputs.version }}"
           name: "Release v${{ github.event.inputs.version }}"
