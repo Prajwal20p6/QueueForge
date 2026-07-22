@@ -31,9 +31,10 @@ ENV PORT=3000
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
+RUN npx prisma generate
 COPY --from=builder /app/dist ./dist
 
 EXPOSE 3000
 
 # Run Prisma schema push on startup followed by application main process
-CMD ["sh", "-c", "npx prisma db push --skip-generate && node dist/index.js"]
+CMD ["sh", "-c", "npx prisma db push && node dist/index.js"]
