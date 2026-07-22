@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import * as fs from 'fs';
 import { EnvLoader } from './env';
-import { isDevelopment, isProduction } from './environment';
+import { isDevelopment } from './environment';
 import { ValidationError } from '../shared/errors/validation-error';
 
 /**
@@ -52,7 +52,6 @@ const serverConfigSchema = z.object({
  */
 export function loadServerConfig(): ServerConfig {
   const isDev = isDevelopment();
-  const isProd = isProduction();
 
   const host = isDev ? '127.0.0.1' : '0.0.0.0';
   const port = Number(EnvLoader.getOrDefault('PORT', '3000'));
@@ -60,10 +59,10 @@ export function loadServerConfig(): ServerConfig {
   const certPath = EnvLoader.getOrDefault('HTTPS_CERT_PATH', './secrets/cert.pem');
   const keyPath = EnvLoader.getOrDefault('HTTPS_KEY_PATH', './secrets/key.pem');
 
-  const httpsEnabled = isProd; // Prod requires HTTPS
+  const httpsEnabled = EnvLoader.getBoolean('HTTPS_ENABLED') || (fs.existsSync(certPath) && fs.existsSync(keyPath));
 
   if (httpsEnabled) {
-    // If running in production or explicitly enabled, check file accessibility
+    // If explicitly enabled or cert files exist, check file accessibility
     if (!fs.existsSync(certPath)) {
       throw new ValidationError(`SSL Certificate file is missing at certPath: "${certPath}"`);
     }
