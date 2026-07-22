@@ -1,7 +1,10 @@
-# Production Multi-Stage Dockerfile for QueueForge
+# Production Multi-Stage Dockerfile for QueueForge with OpenSSL support for Prisma
 FROM node:20-alpine AS builder
 
 WORKDIR /app
+
+# Install OpenSSL and build dependencies for Prisma engine generation
+RUN apk add --no-cache openssl ca-certificates libc6-compat
 
 # Copy package files and install dependencies
 COPY package*.json ./
@@ -17,6 +20,9 @@ RUN npm run build
 FROM node:20-alpine AS runner
 
 WORKDIR /app
+
+# Install runtime OpenSSL and SSL certificates for Prisma Query Engine
+RUN apk add --no-cache openssl ca-certificates libc6-compat
 
 ENV NODE_ENV=production
 ENV PORT=3000
