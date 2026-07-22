@@ -1,0 +1,130 @@
+version: '3.8'
+
+services:
+  # ─── QueueForge Main Application ───────────────────────────────────────────
+  queueforge:
+    build:
+      context: ./
+      dockerfile: docker/Dockerfile.dev
+    container_name: queueforge-app-dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/queueforge?schema=public
+      - REDIS_URL=redis://redis:6379
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+      - PROMETHEUS_PORT=9090
+      - JAEGER_ENDPOINT=http://jaeger:14268/api/traces
+      - JWT_SECRET=test-jwt-secret-min-32-characters-long-abc
+      - API_KEY_SECRET=test-api-key-secret-min-32-characters-long
+      - HMAC_SECRET=test-hmac-secret-min-32-characters-long-abc
+      - START_WORKER=true
+      - START_DAEMON=true
+    volumes:
+      - ./src:/app/src
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
+      - ./tsconfig.json:/app/tsconfig.json
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - queueforge-net
+
+  # ─── PostgreSQL Database ────────────────────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    container_name: queueforge-postgres-dev
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: queueforge
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - queueforge-net
+
+  # ─── Redis Cache ────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: queueforge-redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data_dev:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - queueforge-net
+
+  # ─── Jaeger Collector (Telemetry) ───────────────────────────────────────────
+  jaeger:
+    image: jaegertracing/all-in-one:1.57
+    container_name: queueforge-jaeger-dev
+    ports:
+      - "16686:16686" # Web UI
+      - "4317:4317"   # OTLP receiver (gRPC)
+      - "4318:4318"   # OTLP receiver (HTTP)
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - queueforge-net
+
+  # ─── Prometheus (Metrics Scraper) ───────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    container_name: queueforge-prometheus-dev
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - queueforge-net
+
+  # ─── Grafana Dashboard ──────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:10.4.5
+    container_name: queueforge-grafana-dev
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data_dev:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - queueforge-net
+
+volumes:
+  postgres_data_dev:
+    name: queueforge-postgres-data-dev
+  redis_data_dev:
+    name: queueforge-redis-data-dev
+  grafana_data_dev:
+    name: queueforge-grafana-data-dev
+
+networks:
+  queueforge-net:
+    name: queueforge-network-dev
+    driver: bridge

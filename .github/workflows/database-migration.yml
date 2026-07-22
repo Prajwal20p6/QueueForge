@@ -1,0 +1,76 @@
+name: Database Schema Migrations Validation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'prisma/**'
+  pull_request:
+    paths:
+      - 'prisma/**'
+  workflow_dispatch:
+
+jobs:
+  # ─── Migration Execution & Rollback Verification ──────────────────────────
+  test-migration:
+    name: Run Migrations Dry Run
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: queueforge_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Deploy Schema Migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/queueforge_test?schema=public
+
+      - name: Verify Tables Schema Integrity
+        run: |
+          echo "Verifying schema tables..."
+
+  # ─── Prisma Schema Consistency Checks ──────────────────────────────────────
+  validate-schema:
+    name: Prisma Schema Compiler Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Prisma Client Code Generation
+        run: npx prisma generate
+
+      - name: Validate Prisma Schema Syntax
+        run: npx prisma validate

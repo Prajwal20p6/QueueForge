@@ -1,0 +1,17 @@
+apiVersion: v2
+name: queueforge
+description: Helm chart for QueueForge Event-Driven Pipeline
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - messaging
+  - queue
+  - delivery
+  - event
+home: https://github.com/queueforge
+sources:
+  - https://github.com/queueforge
+maintainers:
+  - name: QueueForge DevOps Team
+    email: devops@queueforge.example.com

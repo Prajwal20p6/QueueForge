@@ -1,0 +1,61 @@
+name: Automated Version Releasing
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  # ─── Determine Version Bump Increment ──────────────────────────────────────
+  detect-version:
+    name: Parse SemVer Commit Keywords
+    runs-on: ubuntu-latest
+    outputs:
+      bump: ${{ steps.version-bump.outputs.bump }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine Version Bump
+        id: version-bump
+        run: |
+          # Retrieve last commit message content
+          commit_msg=$(git log -1 --pretty=%B)
+          echo "Last commit message: $commit_msg"
+          
+          if echo "$commit_msg" | grep -iq "breaking change\|major"; then
+            echo "bump=major" >> $GITHUB_OUTPUT
+          elif echo "$commit_msg" | grep -iq "feat\|minor"; then
+            echo "bump=minor" >> $GITHUB_OUTPUT
+          else
+            echo "bump=patch" >> $GITHUB_OUTPUT
+          fi
+
+  # ─── Tag & Release Generation ──────────────────────────────────────────────
+  create-release:
+    name: Perform Version Bump & Publish Release
+    runs-on: ubuntu-latest
+    needs: detect-version
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Configure Git Author Profile
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Perform Package Version Bump
+        run: |
+          npm version ${{ needs.detect-version.outputs.bump }} -m "chore(release): bump version [skip ci]"
+
+      - name: Push Git Changes
+        run: |
+          git push origin main --follow-tags

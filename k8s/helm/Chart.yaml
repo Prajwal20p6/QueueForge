@@ -1,0 +1,9 @@
+apiVersion: v2
+name: queueforge
+description: A Helm chart for deploying QueueForge Event-Driven Pipeline
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+maintainers:
+  - name: prajwal s
+    email: prajwal@oneinbox.ai

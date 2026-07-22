@@ -1,0 +1,5 @@
+aws_region        = "us-east-1"
+environment       = "production"
+vpc_cidr          = "10.0.0.0/16"
+db_instance_class = "db.r6g.large"
+redis_node_type   = "cache.m6g.large"

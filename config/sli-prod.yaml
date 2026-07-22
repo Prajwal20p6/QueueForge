@@ -1,0 +1,9 @@
+# ─── Production SLI measurements ───────────────────────────────────────────────
+uptime:
+  metric: "up"
+  threshold: 1
+  operator: "eq"
+latency:
+  metric: "ingestion_latency_seconds"
+  threshold: 3.5
+  operator: "lt"

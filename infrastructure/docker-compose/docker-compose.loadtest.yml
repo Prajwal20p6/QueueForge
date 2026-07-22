@@ -1,0 +1,27 @@
+version: '3.8'
+
+networks:
+  queueforge-loadtest-net:
+
+services:
+  api:
+    image: queueforge/api:latest
+    networks:
+      - queueforge-loadtest-net
+    ports:
+      - "3000:3000"
+
+  worker:
+    image: queueforge/worker:latest
+    networks:
+      - queueforge-loadtest-net
+    deploy:
+      replicas: 4
+
+  k6:
+    image: grafana/k6:latest
+    networks:
+      - queueforge-loadtest-net
+    volumes:
+      - ../../tests/load:/scripts
+    command: run /scripts/load-test.js

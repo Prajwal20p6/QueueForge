@@ -1,0 +1,25 @@
+version: '3.8'
+
+networks:
+  queueforge-test-net:
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: queueforge-test-postgres
+    networks:
+      - queueforge-test-net
+    environment:
+      POSTGRES_DB: queueforge_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: queueforge-test-redis
+    networks:
+      - queueforge-test-net
+    ports:
+      - "6379:6379"

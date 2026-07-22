@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # ─── Isolated test database ────────────────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    container_name: queueforge-postgres-test-stack
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: queueforge_test
+    expose:
+      - "5432"
+    # Ephemeral storage - database resets to pristine state on container restart
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+    networks:
+      - queueforge-test-net
+
+  # ─── Isolated test Redis cache ─────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: queueforge-redis-test-stack
+    ports:
+      - "6380:6379" # maps port to 6380 to prevent host collisions
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 2s
+      retries: 5
+    networks:
+      - queueforge-test-net
+
+  # ─── Test runner suite container ──────────────────────────────────────────
+  queueforge-test:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+    container_name: queueforge-test-runner
+    environment:
+      - NODE_ENV=test
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/queueforge_test?schema=public
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=test-jwt-secret-min-32-characters-long-abc
+      - API_KEY_SECRET=test-api-key-secret-min-32-characters-long
+      - HMAC_SECRET=test-hmac-secret-min-32-characters-long-abc
+    volumes:
+      - ../coverage:/app/coverage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1.5GB
+    networks:
+      - queueforge-test-net
+
+networks:
+  queueforge-test-net:
+    name: queueforge-test-network-stack
+    driver: bridge

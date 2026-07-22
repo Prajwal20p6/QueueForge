@@ -1,0 +1,113 @@
+[
+  {
+    "id": "fixture-result-001",
+    "emailId": "support@acme.corp",
+    "agentId": "billing-classifier",
+    "agentVersion": "v2.3.1",
+    "resultPayload": {
+      "category": "billing",
+      "subcategory": "refund_request",
+      "priority": "high",
+      "sentiment": "frustrated",
+      "summary": "Customer requesting refund for duplicate charge on invoice #INV-2024-8821",
+      "entities": ["INV-2024-8821"],
+      "actionRequired": true
+    },
+    "confidenceScore": 0.96,
+    "idempotencyKey": "fixture-idempotency-001",
+    "llmMetadata": {
+      "model": "gpt-4o",
+      "promptHash": "sha256:a1b2c3d4e5f6",
+      "executionId": "exec-llm-001",
+      "tokenInput": 1200,
+      "tokenOutput": 340,
+      "latency": 1.45
+    }
+  },
+  {
+    "id": "fixture-result-002",
+    "emailId": "hello@startup.io",
+    "agentId": "intent-extractor",
+    "agentVersion": "v1.0.0",
+    "resultPayload": {
+      "intent": "product_inquiry",
+      "product": "enterprise-plan",
+      "urgency": "medium",
+      "languages": ["en"],
+      "summary": "Prospect asking about enterprise pricing and custom SLA options",
+      "actionRequired": true
+    },
+    "confidenceScore": 0.82,
+    "idempotencyKey": "fixture-idempotency-002",
+    "llmMetadata": {
+      "model": "claude-3-haiku",
+      "promptHash": "sha256:b2c3d4e5f6a1",
+      "executionId": "exec-llm-002",
+      "tokenInput": 980,
+      "tokenOutput": 210,
+      "latency": 0.89
+    }
+  },
+  {
+    "id": "fixture-result-003",
+    "emailId": "noreply@automated.system",
+    "agentId": "spam-detector",
+    "agentVersion": "v3.1.0",
+    "resultPayload": {
+      "classification": "spam",
+      "spamScore": 0.97,
+      "reasons": ["suspicious_links", "mass_mailer_header"],
+      "quarantine": true,
+      "summary": "Automated marketing email with phishing indicators"
+    },
+    "confidenceScore": 0.41,
+    "idempotencyKey": "fixture-idempotency-003",
+    "llmMetadata": {
+      "model": "gpt-4o-mini",
+      "promptHash": "sha256:c3d4e5f6a1b2",
+      "executionId": "exec-llm-003",
+      "tokenInput": 450,
+      "tokenOutput": 80,
+      "latency": 0.31
+    }
+  },
+  {
+    "id": "fixture-result-004",
+    "emailId": "jane.doe@company.com",
+    "agentId": "sentiment-analyzer",
+    "agentVersion": "v1.5.2",
+    "resultPayload": {
+      "sentiment": "positive",
+      "score": 0.78,
+      "topics": ["feature_request", "praise"],
+      "summary": "Customer happy with recent update and suggesting dark mode feature",
+      "actionRequired": false
+    },
+    "confidenceScore": 0.73,
+    "idempotencyKey": "fixture-idempotency-004"
+  },
+  {
+    "id": "fixture-result-005",
+    "emailId": "cto@enterprise.com",
+    "agentId": "escalation-router",
+    "agentVersion": "v4.0.0",
+    "resultPayload": {
+      "escalationLevel": "executive",
+      "department": "engineering",
+      "sla_breach_risk": true,
+      "deadline": "2024-09-15T09:00:00Z",
+      "summary": "Critical production outage report requiring immediate CTO attention",
+      "contacts": ["support@company.com", "oncall@company.com"]
+    },
+    "confidenceScore": 0.99,
+    "idempotencyKey": "fixture-idempotency-005",
+    "llmMetadata": {
+      "model": "gpt-4o",
+      "promptHash": "sha256:e5f6a1b2c3d4",
+      "executionId": "exec-llm-005",
+      "tokenInput": 2100,
+      "tokenOutput": 620,
+      "latency": 2.10
+    }
+  }
+]

@@ -1,0 +1,6 @@
+server:
+  extraArgs:
+    - --insecure
+configs:
+  cm:
+    timeout.reconciliation: 180s

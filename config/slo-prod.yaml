@@ -1,0 +1,13 @@
+# ─── Production SLO definitions ────────────────────────────────────────────────
+uptime:
+  target: 99.9
+  window: "30d"
+  description: "Uptime availability of the REST API gateway"
+delivery_success:
+  target: 99.95
+  window: "7d"
+  description: "Initial webhook delivery dispatch success rates"
+latency:
+  target: 95.0
+  window: "24h"
+  description: "P95 API ingestion latency under 3.5s"

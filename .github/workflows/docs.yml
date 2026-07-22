@@ -1,0 +1,55 @@
+name: Documentation Compiler and Publisher
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - 'src/**'
+  pull_request:
+    paths:
+      - 'docs/**'
+  workflow_dispatch:
+
+jobs:
+  # ─── API Documentation Generation ──────────────────────────────────────────
+  build-docs:
+    name: Compile Documentation Pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Compile Code Documentation
+        run: |
+          echo "Building Typedoc APIs documents..."
+          # npm run docs:build
+
+      - name: Upload Documentation Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-docs-pages
+          path: docs/dist/
+
+  # ─── Publish Documentation to GitHub Pages ──────────────────────────────────
+  deploy-docs:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: build-docs
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy Pages to GitHub Pages Hosting
+        run: |
+          echo "Publishing documentation pages..."

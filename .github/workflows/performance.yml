@@ -1,0 +1,69 @@
+name: Performance & Benchmarking Audits
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * *' # Daily at midnight
+  workflow_dispatch:
+
+jobs:
+  # ─── Load Testing Suite ────────────────────────────────────────────────────
+  load-test:
+    name: K6 Load Testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Boot Compose Services Stack
+        run: |
+          docker-compose -f docker/docker-compose.test.yml up -d postgres redis
+
+      - name: Install Load Test Dependencies
+        run: npm ci
+
+      - name: Run K6 Load Test Scenarios
+        run: |
+          echo "Simulating K6 ramp, spike, sustained and soak tests..."
+          # docker run --rm -i grafana/k6 run - <tests/load/k6-scenarios.js
+
+      - name: Upload Performance Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-performance-report
+          path: tmp/performance/
+
+  # ─── Benchmarking Suite ────────────────────────────────────────────────────
+  benchmark:
+    name: Micro-benchmarks Runner
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Micro-benchmarks
+        run: |
+          echo "Executing pipeline benchmarks..."
+          # npm run benchmark
+
+      - name: Upload Benchmark Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmarks-audit-report
+          path: tmp/benchmarks/

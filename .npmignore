@@ -1,0 +1,42 @@
+# Exclude source code files
+src/
+tests/
+scripts/
+docker/
+.github/
+.vscode/
+.husky/
+
+# Exclude configuration files
+.env*
+.gitignore
+.gitattributes
+.editorconfig
+.npmrc
+.nvmrc
+.prettier*
+.eslint*
+.commitlint*
+.lintstagedrc.json
+tsconfig*
+jest.config*
+Makefile
+docker-compose*
+Dockerfile*
+Procfile
+renovate.json
+
+# Exclude documentation and project guides
+docs/
+README.md
+LICENSE
+CODE_OF_CONDUCT.md
+SECURITY.md
+MAINTAINERS.md
+VISION.md
+ROADMAP.md
+THANKS.md
+CONTRIBUTING*
+
+# Include compiled output only
+!dist/

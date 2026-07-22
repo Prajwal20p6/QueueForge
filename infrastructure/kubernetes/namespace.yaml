@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: queueforge
+  labels:
+    name: queueforge
+    app.kubernetes.io/name: queueforge

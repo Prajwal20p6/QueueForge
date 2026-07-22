@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: queueforge-netpolicy
+  namespace: queueforge
+spec:
+  podSelector:
+    matchLabels:
+      app: queueforge-api
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres
+    - podSelector:
+        matchLabels:
+          app: redis
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0

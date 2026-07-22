@@ -1,0 +1,14 @@
+tasks:
+  - name: Setup environment and database
+    init: npm install
+    command: |
+      docker-compose up -d postgres redis
+      sleep 5
+      npx prisma db push
+      npm run dev
+
+vscode:
+  extensions:
+    - dbaeumer.vscode-eslint
+    - esbenp.prettier-vscode
+    - prisma.prisma

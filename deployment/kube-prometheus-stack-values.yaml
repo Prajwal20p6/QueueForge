@@ -1,0 +1,9 @@
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+grafana:
+  adminPassword: "admin"
+alertmanager:
+  config:
+    global:
+      resolve_timeout: 5m

@@ -1,0 +1,18 @@
+{
+  "name": "queueforge-k6-tests",
+  "version": "1.0.0",
+  "description": "K6 Load and Performance Testing Suite for QueueForge",
+  "private": true,
+  "scripts": {
+    "test:ramp": "k6 run load-tests/ramp-test.js",
+    "test:spike": "k6 run load-tests/spike-test.js",
+    "test:stress": "k6 run load-tests/stress-test.js",
+    "test:soak": "k6 run load-tests/soak-test.js",
+    "test:endurance": "k6 run load-tests/endurance-test.js",
+    "test:concurrency": "k6 run load-tests/concurrency-test.js",
+    "test:mix": "k6 run load-tests/realistic-mix.js"
+  },
+  "dependencies": {
+    "k6": "^0.0.0"
+  }
+}

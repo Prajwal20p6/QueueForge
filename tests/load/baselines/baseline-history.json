@@ -1,0 +1,10 @@
+[
+  {
+    "version": "1.0.0",
+    "timestamp": "2026-07-18T12:00:00Z",
+    "metrics": {
+      "ramp": { "p95": 120, "errorRate": 0 },
+      "sustained": { "p95": 140, "errorRate": 0 }
+    }
+  }
+]

@@ -1,0 +1,23 @@
+name: Nightly Performance & Benchmarks checking
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # Run daily at 2 AM
+
+jobs:
+  performance:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Benchmarks
+        run: bash ./scripts/run-benchmarks.sh

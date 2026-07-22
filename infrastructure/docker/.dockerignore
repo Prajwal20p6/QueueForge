@@ -1,0 +1,13 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+.env
+coverage
+dist
+tests
+docs
+infrastructure/terraform
+infrastructure/kubernetes
+.vscode
+.idea

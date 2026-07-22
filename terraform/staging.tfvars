@@ -1,0 +1,5 @@
+aws_region        = "us-east-1"
+environment       = "staging"
+vpc_cidr          = "10.0.0.0/16"
+db_instance_class = "db.t4g.micro"
+redis_node_type   = "cache.t4g.micro"

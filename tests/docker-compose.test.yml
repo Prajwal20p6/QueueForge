@@ -1,0 +1,110 @@
+version: '3.9'
+
+services:
+  # ─── PostgreSQL Test Database ──────────────────────────────────────────────
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: queueforge-postgres-test
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpassword
+      POSTGRES_DB: queueforge_test
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5433:5432"   # 5433 to avoid colliding with dev postgres on 5432
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U testuser -d queueforge_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - queueforge-test-net
+
+  # ─── Redis Test Cache ───────────────────────────────────────────────────────
+  redis-test:
+    image: redis:7-alpine
+    container_name: queueforge-redis-test
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --loglevel warning
+    ports:
+      - "6380:6379"   # 6380 to avoid colliding with dev redis on 6379
+    volumes:
+      - redis_test_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    networks:
+      - queueforge-test-net
+
+  # ─── Jaeger Tracing (Test) ──────────────────────────────────────────────────
+  jaeger-test:
+    image: jaegertracing/all-in-one:1.57
+    container_name: queueforge-jaeger-test
+    restart: unless-stopped
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16687:16686"   # Jaeger UI (test) on 16687
+      - "14269:14268"   # HTTP collector
+      - "4318:4317"     # OTLP gRPC
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:14269/healthz | grep -q 'ok'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - queueforge-test-net
+    profiles:
+      - observability
+
+  # ─── Prometheus Test Metrics ────────────────────────────────────────────────
+  prometheus-test:
+    image: prom/prometheus:v2.52.0
+    container_name: queueforge-prometheus-test
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=1h'
+      - '--web.listen-address=0.0.0.0:9092'
+    ports:
+      - "9092:9092"   # Prometheus UI (test) on 9092
+    volumes:
+      - ../prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_test_data:/prometheus
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9092/-/healthy | grep -q 'ok'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - queueforge-test-net
+    profiles:
+      - observability
+
+networks:
+  queueforge-test-net:
+    name: queueforge-test-net
+    driver: bridge
+
+volumes:
+  postgres_test_data:
+    name: queueforge-postgres-test-data
+  redis_test_data:
+    name: queueforge-redis-test-data
+  prometheus_test_data:
+    name: queueforge-prometheus-test-data

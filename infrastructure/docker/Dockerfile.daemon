@@ -1,0 +1,25 @@
+# Production Dockerfile for QueueForge Background Daemons
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json tsconfig.json ./
+COPY src ./src
+COPY prisma ./prisma
+RUN npm ci && npx prisma generate && npm run build
+
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+
+RUN addgroup -S queueforge && adduser -S queueforge -G queueforge
+
+COPY package*.json ./
+RUN npm ci --only=production
+
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/prisma ./prisma
+COPY infrastructure/docker/entrypoints/daemon.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+USER queueforge
+
+ENTRYPOINT ["/app/entrypoint.sh"]

@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: queueforge-worker
+  namespace: queueforge
+  labels:
+    app: queueforge-worker
+spec:
+  serviceName: queueforge-worker-headless
+  replicas: 3
+  selector:
+    matchLabels:
+      app: queueforge-worker
+  template:
+    metadata:
+      labels:
+        app: queueforge-worker
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - queueforge-worker
+              topologyKey: kubernetes.io/hostname
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+      - name: queueforge-worker
+        image: queueforge:latest
+        command: ["node", "dist/src/worker/main.js"]
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 1.5Gi
+        envFrom:
+        - configMapRef:
+            name: queueforge-config
+        - secretRef:
+            name: queueforge-secrets

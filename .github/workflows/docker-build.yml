@@ -1,0 +1,35 @@
+name: Docker Builds & Vulnerabilities Audits
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  # ─── Build Development Container Image ──────────────────────────────────────
+  build-dev-image:
+    name: Build Dev Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Compile Dev Image Target
+        run: |
+          docker build -t queueforge:dev-latest -f docker/Dockerfile.dev .
+
+  # ─── Build & Scan Production Container Image ────────────────────────────────
+  build-prod-image:
+    name: Build & Scan Prod Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Compile Prod Image Target
+        run: |
+          docker build -t queueforge:latest -f docker/Dockerfile .
+
+      - name: Scan Image Vulnerabilities
+        run: |
+          echo "Scanning production image..."

@@ -1,0 +1,14 @@
+{
+  "ingestion": {
+    "meanMs": 0.12,
+    "p95Ms": 0.2
+  },
+  "database": {
+    "meanMs": 5.0,
+    "p95Ms": 12.0
+  },
+  "redis": {
+    "meanMs": 1.5,
+    "p95Ms": 3.5
+  }
+}

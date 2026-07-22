@@ -1,0 +1,10 @@
+# ─── Production Alert Rules & Escalation ───────────────────────────────────────
+alerts:
+  - name: "IngestionSLOBreach"
+    severity: "critical"
+    channel: "#pagerduty"
+    escalate_after_mins: 15
+  - name: "CPUExhaustion"
+    severity: "warning"
+    channel: "#slack-ops"
+    escalate_after_mins: 30

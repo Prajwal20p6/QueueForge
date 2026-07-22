@@ -1,0 +1,50 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "commonjs",
+    "lib": ["es2020"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@config/*": ["config/*"],
+      "@shared/*": ["shared/*"],
+      "@domain/*": ["domain/*"],
+      "@application/*": ["application/*"],
+      "@infrastructure/*": ["infrastructure/*"],
+      "@presentation/*": ["presentation/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    "tests",
+    "src/infrastructure/database/prisma.service.ts",
+    "src/infrastructure/database/PrismaDeliveryLogRepository.ts",
+    "src/infrastructure/database/PrismaDestinationRepository.ts",
+    "src/infrastructure/database/PrismaTaskResultRepository.ts",
+    "src/infrastructure/queue/bullmq.service.ts",
+    "src/infrastructure/queue/bullmq.worker.ts",
+    "src/infrastructure/monitoring/metrics.service.ts",
+    "src/presentation/**/*"
+  ]
+}

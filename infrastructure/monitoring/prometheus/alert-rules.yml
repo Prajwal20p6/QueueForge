@@ -1,0 +1,18 @@
+groups:
+  - name: queueforge_alerts
+    rules:
+      - alert: HighErrorRate
+        expr: rate(queueforge_delivery_attempts_total{status="FAILED"}[5m]) / rate(queueforge_delivery_attempts_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "QueueForge delivery error rate above 5%"
+
+      - alert: DLQBacklogHigh
+        expr: queueforge_dlq_items_total > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Dead Letter Queue has exceeded 1000 items"

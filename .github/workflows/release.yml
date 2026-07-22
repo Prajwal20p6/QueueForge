@@ -1,0 +1,64 @@
+name: Manual Release Creator
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release Version (e.g., 1.1.0)'
+        required: true
+        default: '1.1.0'
+
+jobs:
+  # ─── Version Tag and Release Generation ────────────────────────────────────
+  create-release:
+    name: Generate Version Tag & Release Notes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Configure Git Author Profile
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Update Version in Package Manifests
+        run: |
+          npm version ${{ github.event.inputs.version }} --no-git-tag-version
+
+      - name: Append Version Changes to Changelog
+        run: |
+          echo -e "## [${{ github.event.inputs.version }}] - $(date '+%Y-%m-%d')\n\n- Manual dispatch release\n\n$(cat CHANGELOG.md 2>/dev/null || true)" > CHANGELOG.md
+
+      - name: Commit and Tag Changes
+        run: |
+          git add package.json package-lock.json CHANGELOG.md
+          git commit -m "chore(release): bump version to ${{ github.event.inputs.version }}"
+          git tag -a "v${{ github.event.inputs.version }}" -m "Version v${{ github.event.inputs.version }}"
+          git push origin main --follow-tags
+
+      - name: Build & Publish Release Docker Image
+        run: |
+          echo "Building release docker image..."
+          # docker build -t queueforge:${{ github.event.inputs.version }} -f docker/Dockerfile .
+
+      - name: Construct GitHub Release Notes
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ github.event.inputs.version }}"
+          name: "Release v${{ github.event.inputs.version }}"
+          body: |
+            Release of version ${{ github.event.inputs.version }}
+            - Manual production release tag triggered.
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

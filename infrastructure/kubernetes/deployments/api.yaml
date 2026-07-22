@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: queueforge-api
+  namespace: queueforge
+  labels:
+    app: queueforge-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: queueforge-api
+  template:
+    metadata:
+      labels:
+        app: queueforge-api
+    spec:
+      serviceAccountName: queueforge-sa
+      containers:
+        - name: api
+          image: queueforge/api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: queueforge-config
+            - secretRef:
+                name: queueforge-secrets
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "2048Mi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5

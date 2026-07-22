@@ -1,0 +1,18 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# QueueForge Repository Code Owners Declarations
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Default owners for all files
+* @oneinbox/core-team
+
+# Security configurations owners
+/src/security/ @oneinbox/security-engineers
+/src/api/middleware/auth.middleware.ts @oneinbox/security-engineers
+
+# Database migrations and schema definitions owners
+/prisma/ @oneinbox/database-administrators
+
+# DevOps and Deployment configs owners
+/.github/workflows/ @oneinbox/devops-engineers
+/docker/ @oneinbox/devops-engineers
+/Makefile @oneinbox/devops-engineers

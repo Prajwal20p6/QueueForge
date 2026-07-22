@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: queueforge-api-service
+  namespace: queueforge
+  labels:
+    app: queueforge-api
+spec:
+  type: ClusterIP
+  selector:
+    app: queueforge-api
+  ports:
+    - port: 80
+      targetPort: 3000
+      name: http

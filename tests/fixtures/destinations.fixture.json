@@ -1,0 +1,42 @@
+[
+  {
+    "id": "dest-webhook-001",
+    "endpointUrl": "https://webhook.example.com/ingest",
+    "destinationType": { "type": "WEBHOOK", "method": "POST" },
+    "eventFilters": { "agentIds": ["billing-classifier", "escalation-router"], "minConfidence": 0.7 },
+    "enabled": true,
+    "description": "Primary billing webhook — receives high-confidence billing results"
+  },
+  {
+    "id": "dest-webhook-002",
+    "endpointUrl": "https://crm.acme.corp/api/ai-results",
+    "destinationType": { "type": "WEBHOOK", "method": "POST" },
+    "eventFilters": { "agentIds": [], "minConfidence": 0.0 },
+    "enabled": true,
+    "description": "CRM sync webhook — receives all agent results for record keeping"
+  },
+  {
+    "id": "dest-db-001",
+    "endpointUrl": "https://internal-db-proxy.oneinbox.ai/write",
+    "destinationType": { "type": "DATABASE", "table": "ai_results_archive" },
+    "eventFilters": { "agentIds": ["sentiment-analyzer", "intent-extractor"] },
+    "enabled": true,
+    "description": "Internal analytics database — stores sentiment and intent results"
+  },
+  {
+    "id": "dest-queue-001",
+    "endpointUrl": "https://queue-broker.oneinbox.ai/publish",
+    "destinationType": { "type": "QUEUE", "queueName": "escalation-queue" },
+    "eventFilters": { "agentIds": ["escalation-router"], "minConfidence": 0.9 },
+    "enabled": true,
+    "description": "Escalation queue — routes critical executive issues to on-call system"
+  },
+  {
+    "id": "dest-audit-001",
+    "endpointUrl": "https://audit.oneinbox.ai/log",
+    "destinationType": { "type": "AUDIT", "retentionDays": 90 },
+    "eventFilters": {},
+    "enabled": false,
+    "description": "Compliance audit log — disabled in test by default, stores all events"
+  }
+]

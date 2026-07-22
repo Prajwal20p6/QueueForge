@@ -1,0 +1,135 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum DestinationType {
+  WEBHOOK
+  DATABASE
+  QUEUE
+  AUDIT
+}
+
+enum DeliveryStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  SCHEDULED_RETRY
+  FAILED_DLQ
+}
+
+model AiTaskResult {
+  id              String               @id @default(uuid())
+  emailId         String
+  agentId         String
+  agentVersion    String
+  resultPayload   Json
+  confidenceScore Float
+  llmMetadata     Json?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  deletedAt       DateTime?
+  deliveries      TaskResultDelivery[]
+
+  @@index([emailId, createdAt])
+  @@index([agentId])
+  @@index([createdAt])
+  @@map("ai_task_results")
+}
+
+model Destination {
+  id                      String               @id @default(uuid())
+  destinationType         DestinationType      @map("type")
+  endpointUrl             String               @map("endpoint")
+  eventFilters            Json?
+  enabled                 Boolean              @default(true)
+  retryStrategy           String               @default("exponential")
+  circuitBreakerThreshold Int                  @default(5)
+  timeout                 Int                  @default(5000)
+  metadata                Json                 @default("{}")
+  createdAt               DateTime             @default(now())
+  updatedAt               DateTime             @updatedAt
+  deletedAt               DateTime?
+  deliveries              TaskResultDelivery[]
+
+  @@index([destinationType])
+  @@index([enabled])
+  @@index([createdAt])
+  @@map("destinations")
+}
+
+model TaskResultDelivery {
+  id            String                      @id @default(uuid())
+  taskResultId  String
+  destinationId String
+  status        DeliveryStatus
+  retryCount    Int                         @default(0)
+  nextRetryAt   DateTime?
+  lastAttemptAt DateTime?
+  lastError     String?
+  errorCategory String?
+  completedAt   DateTime?
+  createdAt     DateTime                    @default(now())
+  updatedAt     DateTime                    @updatedAt
+  deletedAt     DateTime?
+  result        AiTaskResult                @relation(fields: [taskResultId], references: [id], onDelete: Cascade)
+  destination   Destination                 @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  attempts      TaskResultDeliveryAttempt[]
+
+  @@unique([taskResultId, destinationId])
+  @@index([status])
+  @@index([nextRetryAt])
+  @@index([status, createdAt])
+  @@map("task_result_deliveries")
+}
+
+model TaskResultDeliveryAttempt {
+  id             String             @id @default(uuid())
+  deliveryId     String
+  attemptNumber  Int
+  responseStatus Int?               @map("statusCode")
+  responseTimeMs Int                @default(0) @map("latencyMs")
+  requestHeaders Json @default("{}")
+  responseHeaders Json @default("{}")
+  errorMessage   String?
+  errorStack     String?
+  timestamp      DateTime           @default(now()) @map("createdAt")
+  delivery       TaskResultDelivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+
+  @@index([deliveryId, attemptNumber])
+  @@index([timestamp])
+  @@index([responseStatus])
+  @@map("task_result_delivery_attempts")
+}
+
+model IdempotencyCache {
+  compositeKey String   @id
+  deliveryId   String
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([expiresAt])
+  @@map("idempotency_cache")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  eventType  String
+  entityType String
+  entityId   String
+  actorId    String?  @map("userId")
+  action     String
+  changes    Json
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([entityId, createdAt])
+  @@index([eventType, createdAt])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

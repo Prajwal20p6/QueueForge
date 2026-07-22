@@ -1,0 +1,22 @@
+replicaCount:
+  api: 3
+  worker: 2
+  daemon: 1
+
+image:
+  repository: queueforge/api
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: "nginx"
+  hosts:
+    - host: api.queueforge.example.com
+      paths:
+        - path: /
+          pathType: Prefix

@@ -1,0 +1,5 @@
+autoDiscovery:
+  clusterName: "queueforge-cluster"
+awsRegion: "us-east-1"
+rbac:
+  create: true

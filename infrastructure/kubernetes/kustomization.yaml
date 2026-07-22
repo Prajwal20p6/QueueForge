@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: queueforge
+
+resources:
+  - namespace.yaml
+  - configmaps/app-config.yaml
+  - rbac/serviceaccount.yaml
+  - deployments/api.yaml
+  - deployments/worker.yaml
+  - deployments/daemon.yaml
+  - services/api-service.yaml
+  - ingress/api-ingress.yaml
+  - hpa/api-hpa.yaml
+  - pdb/api-pdb.yaml
+  - network-policies/default-deny.yaml

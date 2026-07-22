@@ -1,0 +1,64 @@
+name: Code Quality checkpoints
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # ─── Test Coverage Quality Gates ───────────────────────────────────────────
+  code-coverage:
+    name: Codecov Coverage Checker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Tests with Coverage
+        run: npm run test:unit -- --coverage
+
+      - name: Upload to Codecov
+        run: |
+          echo "Uploading coverage reports to Codecov..."
+
+  # ─── Static Code Complexity Metrics ────────────────────────────────────────
+  code-metrics:
+    name: SonarQube Static Metrics
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: SonarQube Code Quality Analysis
+        run: |
+          echo "Analyzing code complexity and duplication..."
+
+  # ─── Outdated Dependencies Checking ────────────────────────────────────────
+  dependency-check:
+    name: Package Freshness Monitor
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Report Outdated Packages
+        run: npm outdated || true

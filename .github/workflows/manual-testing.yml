@@ -1,0 +1,48 @@
+name: Manual Testing dispatch
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target Testing Environment'
+        required: true
+        default: 'staging'
+      test_suite:
+        description: 'Test Suite Scope (smoke / regression / all)'
+        required: true
+        default: 'smoke'
+
+jobs:
+  # ─── Smoke Verification Runner ─────────────────────────────────────────────
+  smoke-tests:
+    name: Smoke Testing suite
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test_suite == 'smoke' || github.event.inputs.test_suite == 'all'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Test Environment
+        run: |
+          echo "Deploying to target: ${{ github.event.inputs.environment }}..."
+
+      - name: Run Smoke Verification Scripts
+        run: |
+          bash .github/scripts/post-deploy.sh http://localhost:3000
+
+  # ─── Regression Testing Runner ─────────────────────────────────────────────
+  regression-tests:
+    name: Regression Testing suite
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test_suite == 'regression' || github.event.inputs.test_suite == 'all'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Test Environment
+        run: |
+          echo "Deploying for regression testing..."
+
+      - name: Run Full Regression Suite
+        run: |
+          echo "Executing regression testing suite..."

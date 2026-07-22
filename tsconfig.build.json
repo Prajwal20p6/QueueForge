@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "sourceMap": false,
+    "declarationMap": false
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    "tests",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "src/infrastructure/database/prisma.service.ts",
+    "src/infrastructure/database/PrismaDeliveryLogRepository.ts",
+    "src/infrastructure/database/PrismaDestinationRepository.ts",
+    "src/infrastructure/database/PrismaTaskResultRepository.ts",
+    "src/infrastructure/queue/bullmq.service.ts",
+    "src/infrastructure/queue/bullmq.worker.ts",
+    "src/infrastructure/monitoring/metrics.service.ts",
+    "src/presentation/**/*"
+  ]
+}

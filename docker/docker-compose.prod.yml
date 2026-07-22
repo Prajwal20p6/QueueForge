@@ -1,0 +1,157 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# QueueForge Production Compose Deployment Template
+# ──────────────────────────────────────────────────────────────────────────────
+
+version: '3.8'
+
+services:
+  # ─── QueueForge Main Application ───────────────────────────────────────────
+  queueforge:
+    # In production, pull the published release artifact from container registry
+    image: queueforge:1.0.0
+    container_name: queueforge-app-prod
+    restart: always
+    env_file:
+      - .env.prod
+    ports:
+      - "3000:3000"
+    volumes:
+      - app_logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2GB
+        reservations:
+          cpus: '0.5'
+          memory: 512MB
+    networks:
+      - queueforge-backend-net
+      - queueforge-frontend-net
+
+  # ─── PostgreSQL Production Instance ─────────────────────────────────────────
+  postgres:
+    image: postgres:15.7-alpine
+    container_name: queueforge-postgres-prod
+    restart: always
+    environment:
+      # These should refer to secure secrets stored in .env.prod
+      POSTGRES_USER: ${PROD_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${PROD_DB_PASSWORD}
+      POSTGRES_DB: queueforge_production
+    # Pinned to internal ports only to prevent direct internet exposure
+    expose:
+      - "5432"
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4GB
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - queueforge-backend-net
+
+  # ─── Redis Cache with Persistence ───────────────────────────────────────────
+  redis:
+    image: redis:7.2.5-alpine
+    container_name: queueforge-redis-prod
+    restart: always
+    command: redis-server --appendonly yes --appendfsync everysec --requirepass ${PROD_REDIS_PASSWORD}
+    expose:
+      - "6379"
+    volumes:
+      - redis_prod_data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1GB
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${PROD_REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - queueforge-backend-net
+
+  # ─── Jaeger Telemetry Collector ─────────────────────────────────────────────
+  jaeger:
+    image: jaegertracing/all-in-one:1.57.0
+    container_name: queueforge-jaeger-prod
+    restart: always
+    expose:
+      - "4317"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1GB
+    networks:
+      - queueforge-backend-net
+
+  # ─── Prometheus Scraper ─────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    container_name: queueforge-prometheus-prod
+    restart: always
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    expose:
+      - "9090"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1GB
+    networks:
+      - queueforge-backend-net
+
+  # ─── Grafana Dashboard ──────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:10.4.5
+    container_name: queueforge-grafana-prod
+    restart: always
+    expose:
+      - "3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${PROD_GRAFANA_ADMIN_PASSWORD}
+    volumes:
+      - grafana_prod_data:/var/lib/grafana
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512MB
+    networks:
+      - queueforge-backend-net
+
+volumes:
+  postgres_prod_data:
+    name: queueforge-postgres-prod-data
+  redis_prod_data:
+    name: queueforge-redis-prod-data
+  grafana_prod_data:
+    name: queueforge-grafana-prod-data
+  app_logs:
+    name: queueforge-app-logs
+
+networks:
+  # Split net structure ensures database is separated from ingress edge routes
+  queueforge-backend-net:
+    name: queueforge-backend-network
+    driver: bridge
+    internal: true
+  queueforge-frontend-net:
+    name: queueforge-frontend-network
+    driver: bridge

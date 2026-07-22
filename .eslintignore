@@ -1,0 +1,13 @@
+node_modules/
+dist/
+build/
+coverage/
+.next/
+out/
+prisma/migrations/
+prisma/client/
+src/infrastructure/database/generated/
+tests/fixtures/
+logs/
+tmp/
+backups/

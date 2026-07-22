@@ -1,0 +1,22 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "alert-rules.yml"
+  - "recording-rules.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - "alertmanager:9093"
+
+scrape_configs:
+  - job_name: "queueforge-api"
+    static_configs:
+      - targets: ["api:8081"]
+
+  - job_name: "queueforge-worker"
+    static_configs:
+      - targets: ["worker:8081"]

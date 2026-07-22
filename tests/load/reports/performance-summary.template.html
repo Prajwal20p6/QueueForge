@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>QueueForge Performance summary Report</title>
+  <style>
+    body { font-family: sans-serif; background: #fafafa; margin: 40px; }
+    h1 { color: #333; }
+    .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+  <h1>QueueForge Performance summary Report</h1>
+  <div class="card">
+    <p><strong>P50 Ingestion Latency:</strong> {{p50}}ms</p>
+    <p><strong>P95 Ingestion Latency:</strong> {{p95}}ms</p>
+    <p><strong>P99 Ingestion Latency:</strong> {{p99}}ms</p>
+    <p><strong>RPS achieved:</strong> {{rps}}</p>
+    <p><strong>Error Rate:</strong> {{errorRate}}%</p>
+  </div>
+</body>
+</html>

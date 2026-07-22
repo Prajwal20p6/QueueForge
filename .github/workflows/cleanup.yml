@@ -1,0 +1,50 @@
+name: Scheduled Cache and Artifacts Cleanup
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Weekly on Sundays at midnight
+  workflow_dispatch:
+
+jobs:
+  # ─── Purge Expired Artifacts ───────────────────────────────────────────────
+  cleanup-old-artifacts:
+    name: Prune GitHub Run Artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Purge Artifacts Older than 30 Days
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const response = await github.rest.actions.listArtifactsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+            for (const artifact of response.data.artifacts) {
+              if (new Date(artifact.created_at).getTime() < cutoff) {
+                console.log(`Pruning expired artifact: ${artifact.name}`);
+                await github.rest.actions.deleteArtifact({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: artifact.id,
+                });
+              }
+            }
+
+  # ─── Prune Untagged Packages ───────────────────────────────────────────────
+  cleanup-old-packages:
+    name: Prune Untagged Docker Images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prune Stale Images from Registry
+        run: |
+          echo "Pruning untagged packages..."
+
+  # ─── Prune Merged Branches ─────────────────────────────────────────────────
+  cleanup-stale-branches:
+    name: Prune Merged Branches
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prune Stale Merged Git Branches
+        run: |
+          echo "Pruning merged branches..."

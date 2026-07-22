@@ -1,0 +1,19 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Development Containerization File
+# ──────────────────────────────────────────────────────────────────────────────
+FROM node:20-alpine
+
+# Install development system utility tools (postgresql client for interactive db check, curl)
+RUN apk add --no-cache libc6-compat openssl postgresql-client curl bash
+
+WORKDIR /app
+
+# Expose local port mapping target
+EXPOSE 3000
+
+# Install all dependencies (npm install is executed at container entrypoint or startup)
+# to ensure local volumes do not clash with installed modules.
+ENV NODE_ENV=development
+
+# Setup default path and shell options
+CMD ["npm", "run", "dev"]

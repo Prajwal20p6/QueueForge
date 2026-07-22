@@ -1,0 +1,23 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Nginx Reverse Proxy Dockerfile
+# ──────────────────────────────────────────────────────────────────────────────
+FROM nginx:1.25-alpine
+
+# Copy local custom configuration into default config directories
+COPY config/nginx/nginx.conf /etc/nginx/nginx.conf
+
+# Setup runtime directories permissions for non-root execution
+RUN mkdir -p /var/cache/nginx /var/run /var/log/nginx && \
+    chown -R nginx:nginx /var/cache/nginx /var/run /var/log/nginx
+
+# Run Nginx as non-root user (nginx user)
+USER nginx
+
+# Expose HTTP and HTTPS default socket listening ports
+EXPOSE 80 443
+
+# Check proxy container service status via local query probe
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD wget --quiet --tries=1 --spider http://localhost:80/health || exit 1
+
+CMD ["nginx", "-g", "daemon off;"]

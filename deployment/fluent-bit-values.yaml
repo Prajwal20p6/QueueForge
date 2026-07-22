@@ -1,0 +1,13 @@
+config:
+  service: |
+    [SERVICE]
+        Flush        1
+        Log_Level    info
+  inputs: |
+    [INPUT]
+        Name             tail
+        Path             /var/log/containers/*.log
+  outputs: |
+    [OUTPUT]
+        Name            stdout
+        Match           *

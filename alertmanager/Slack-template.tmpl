@@ -1,0 +1,6 @@
+{{ define "slack.title" }}[{{ .Status | toUpper }}] QueueForge Alert - {{ .CommonLabels.alertname }}{{ end }}
+{{ define "slack.text" }}
+*Severity:* {{ .CommonLabels.severity }}
+*Summary:* {{ .CommonAnnotations.summary }}
+*Description:* {{ .CommonAnnotations.description }}
+{{ end }}

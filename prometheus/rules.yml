@@ -1,0 +1,34 @@
+groups:
+  - name: queueforge-alerts
+    rules:
+      - alert: HostCpuHigh
+        expr: instance:node_cpu_utilisation:rate5m > 0.80
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Host CPU utilization is extremely high (>80%)"
+
+      - alert: HostMemoryHigh
+        expr: instance:node_memory_utilisation:ratio > 0.85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host RAM memory utilization is high (>85%)"
+
+      - alert: QueueCongestion
+        expr: queueforge_queue_depth > 1000
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Queue backlog has exceeded 1000 items"
+
+      - alert: CircuitBreakerOpen
+        expr: queueforge_circuit_state == 1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Destination circuit breaker has tripped OPEN"

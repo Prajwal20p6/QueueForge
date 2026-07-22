@@ -1,0 +1,5 @@
+groups:
+  - name: queueforge_recordings
+    rules:
+      - record: job:queueforge_deliveries:rate5m
+        expr: rate(queueforge_deliveries_total[5m])
