@@ -1,0 +1,49 @@
+services:
+  # 1. QueueForge Main Web Service (Express API, BullMQ Worker, Background Daemons)
+  - type: web
+    name: queueforge-api
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: NODE_VERSION
+        value: 20.15.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: queueforge-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: queueforge-redis
+          property: connectionString
+      - key: JWT_SECRET
+        value: QF_JWT_SECRET_9f4a7d2c8e1b6f5a3d9c7e2a8b4f6d1e0c5a9b3f7d2e8c1
+      - key: API_KEY
+        value: qf_api_key_7b9e3d5a1c8f4e6b2d9a7c5f1e3b8d6a
+      - key: API_KEY_SECRET
+        value: qf_api_key_7b9e3d5a1c8f4e6b2d9a7c5f1e3b8d6a
+      - key: HMAC_SECRET
+        value: qf_hmac_secret_4c8e2a9f6b1d7c3e5a8f2b9d6c1e7a4f8b3
+
+databases:
+  # 2. Managed PostgreSQL Database Instance
+  - name: queueforge-db
+    databaseName: queueforge
+    user: postgres
+    plan: free
+    region: oregon
+
+  # 3. Managed Redis Instance
+  - name: queueforge-redis
+    type: redis
+    plan: free
+    region: oregon
+    maxmemoryPolicy: allkeys-lru
