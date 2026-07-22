@@ -1,7 +1,7 @@
 # ──────────────────────────────────────────────────────────────────────────────
 # STAGE 1: Build & Validate Compilation
 # ──────────────────────────────────────────────────────────────────────────────
-FROM node:20-alpine AS builder
+FROM node:26-alpine AS builder
 
 # Install system dependencies needed for native modules
 RUN apk add --no-cache libc6-compat openssl python3 make g++
@@ -37,7 +37,7 @@ RUN npm prune --production
 # ──────────────────────────────────────────────────────────────────────────────
 # STAGE 2: Lightweight Production Execution
 # ──────────────────────────────────────────────────────────────────────────────
-FROM node:20-alpine AS runner
+FROM node:26-alpine AS runner
 
 # Install runtime utilities (dumb-init for PID 1 signaling, curl for healthcheck, openssl for prisma engine)
 RUN apk add --no-cache dumb-init curl openssl coreutils bash
