@@ -98,7 +98,7 @@ export function loadSecurityConfig(envOverride?: any): SecurityConfig {
 
   // Production safety: reject explicit placeholder values
   if (isProd) {
-    const dummyPatterns = ['dummy_secret', 'test_placeholder', 'changeme_now', 'your_secret_here'];
+    const dummyPatterns = ['dummy', 'test_placeholder', 'changeme', 'your_secret_here'];
     for (const secret of [jwtSecret, hmacSecret, apiKeySecret]) {
       const lower = secret.toLowerCase();
       if (dummyPatterns.some((p) => lower.includes(p))) {
