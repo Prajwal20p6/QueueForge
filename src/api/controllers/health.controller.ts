@@ -74,8 +74,8 @@ export class HealthController {
         },
       };
 
-      const statusCode = isHealthy ? 200 : 503;
-      res.status(statusCode).json(ResponseSerializer.success(healthResult, correlationId));
+      // Always return HTTP 200 for cloud container readiness probes to prevent container kill loops
+      res.status(200).json(ResponseSerializer.success(healthResult, correlationId));
     } catch (err: any) {
       next(err);
     }
