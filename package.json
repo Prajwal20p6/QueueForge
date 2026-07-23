@@ -40,7 +40,9 @@
     "clean": "node -e \"const fs = require('fs'); ['dist', 'build', 'coverage'].forEach(d => fs.rmSync(d, {recursive: true, force: true}))\"",
     "migrate": "prisma migrate dev",
     "seed": "ts-node prisma/seed.ts",
-    "docker:build": "docker build -t queueforge ."
+    "docker:build": "docker build -t queueforge .",
+    "dashboard:dev": "cd src/frontend && npm run dev",
+    "dashboard:build": "cd src/frontend && npm run build"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
