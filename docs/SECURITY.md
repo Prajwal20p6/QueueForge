@@ -1,37 +1,49 @@
-# Security Policy and Compliance
+# Security Architecture & Threat Model
 
-This document describes the security protocols, encryption parameters, authorization boundaries, and GDPR compliance policies implemented in QueueForge.
-
----
-
-## 🔒 Authentication & Key Management
-
-### 1. API Keys
-*   Used for machine-to-machine integration.
-*   Stored securely in configuration environment keys. Keys must be rotated every 90 days.
-
-### 2. JWT Strategy
-*   Used for client dashboard interactions.
-*   Signed using HMAC-SHA256 with the `JWT_SECRET`. Tokens expire after 3600 seconds.
+This document outlines the security controls, authentication mechanisms, encryption protocols, and compliance safeguards implemented in QueueForge.
 
 ---
 
-## 🛡️ Webhook Integrity (HMAC signatures)
+## 🔒 Authentication & Access Control
 
-Outgoing webhook dispatches carry HMAC-SHA256 signatures to prevent tampering or replay attacks. The header `X-QueueForge-Signature` contains a hex-encoded hash computed over the request payload prefixed by the dispatch timestamp:
+- **JWT Tokens**: Signed using HMAC-SHA256 with 24-hour expiration (`JWT_SECRET`).
+- **Master API Keys**: SHA-256 hashed API keys (`X-API-Key`) validated against configuration credentials.
+- **HMAC Webhook Payload Signing**: Outgoing webhook payloads carry an `X-QueueForge-Signature` header generated via SHA-256 HMAC over the payload timestamp and JSON data.
 
 ```
-Signature = HMAC-SHA256(HMAC_SECRET, Timestamp + '.' + Payload)
+Signature = HMAC-SHA256(HMAC_SECRET, Timestamp + '.' + JSONPayload)
 ```
-
-Downstream receivers must compute this signature and compare it securely using time-constant comparison functions.
 
 ---
 
-## 📁 GDPR Data Retention & Privacy
+## 🛡️ Data Protection & Privacy
 
-To comply with privacy laws, personal identifiers (like email addresses) are handled strictly:
+- **PostgreSQL Encryption**: Require TLS 1.3 encrypted SSL connections in production.
+- **Redis Security**: Authenticated access via password/URL, encrypted at rest.
+- **Secrets Management**: Loaded dynamically from environment variables or cloud secrets managers (AWS Secrets Manager, HashiCorp Vault). Never committed to version control.
+- **Audit Logging**: Sensitive tokens and credentials filtered from Winston logger outputs.
 
-*   **Retention Policies**: Logs, audit trails, and delivery attempts are retained for a maximum of 7 days before being automatically purged via the database maintenance daemon.
-*   **PII Purging**: When a user invokes the deletion API, their corresponding `AiTaskResult` records are soft-deleted immediately and hard-deleted from all tables within 24 hours.
-*   **Encrypted Storage**: Connection strings, passwords, and API keys are stored in encrypted environment parameter stores (such as AWS Systems Manager Parameter Store or HashiCorp Vault) and are never committed to version control.
+---
+
+## ⚡ Rate Limiting & Distributed Protection
+
+- **API Rate Limiting**: Enforced via sliding-window counters in Redis (default 1,000 req/min per API key).
+- **Helmet HTTP Headers**: Enforces strict `Content-Security-Policy`, `X-Frame-Options`, `X-Content-Type-Options`, and `Strict-Transport-Security`.
+- **CORS Policies**: Strict origin whitelist matching production domains.
+
+---
+
+## 📋 Audit, GDPR & HIPAA Compliance
+
+- **Immutable Audit Log**: Append-only PostgreSQL table tracking all system configuration and user actions.
+- **Data Retention & Purging**: Soft-deletion of user task result payloads with optional 7-day auto-purge daemon.
+- **GDPR Compliance**: Support for user data deletion requests.
+
+---
+
+## 🚀 Recommended Production Hardening Checklist
+
+1. Enable **TLS 1.3** for all ingress and database network links.
+2. Store secrets in **AWS Secrets Manager** or **HashiCorp Vault**.
+3. Restrict PostgreSQL and Redis access using **VPC Private Subnets** and Kubernetes NetworkPolicies.
+4. Deploy an Application Firewall (WAF) in front of Express API instances.

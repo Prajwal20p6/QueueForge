@@ -287,6 +287,15 @@ npm run build
 
 ---
 
+## Documentation & Engineering Specs
+
+- 📖 [Architecture Decision Records (ADR)](docs/ADR.md) - Rationale behind key technical decisions (BullMQ, Opossum Circuit Breakers, Redis Idempotency).
+- ⚡ [Performance Benchmarks & Sizing](docs/PERFORMANCE.md) - Latency profiles, throughput limits, and database indexing optimizations.
+- 🔒 [Security Model & Protection](docs/SECURITY.md) - Authentication mechanisms, HMAC payload signing, rate limiting, and compliance.
+- 🛠️ [Operations & Runbooks](docs/OPERATIONS.md) - Incident handling, recovery procedures, and cluster monitoring.
+
+---
+
 ## License
 
 Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
