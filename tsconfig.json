@@ -45,6 +45,7 @@
     "src/infrastructure/queue/bullmq.service.ts",
     "src/infrastructure/queue/bullmq.worker.ts",
     "src/infrastructure/monitoring/metrics.service.ts",
-    "src/presentation/**/*"
+    "src/presentation/**/*",
+    "src/frontend/**/*"
   ]
 }

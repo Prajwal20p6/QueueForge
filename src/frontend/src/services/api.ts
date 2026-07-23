@@ -96,7 +96,6 @@ export const apiService = {
       const res = await client.get('/api/v1/deliveries', { params: filters }).catch(() => null);
       if (res?.data) {
         const rawItems = res.data.data || res.data.items || (Array.isArray(res.data) ? res.data : []);
-        const total = res.data.total || rawItems.length;
 
         const data: TaskDelivery[] = rawItems.map((item: any) => ({
           id: item.id || `del-${Math.random().toString(36).substr(2, 9)}`,
