@@ -32,6 +32,7 @@
     "test:unit": "jest --testPathPattern=tests/unit --runInBand",
     "test:integration": "jest --testPathPattern=tests/integration --runInBand",
     "test:chaos": "jest --testPathPattern=tests/chaos --runInBand",
+    "test:performance": "jest --testPathPattern=tests/performance --runInBand",
     "test:watch": "jest --watch",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",

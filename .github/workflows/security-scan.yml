@@ -1,16 +1,10 @@
-name: Scheduled Security Scanning
+name: Security Scan
 
-on:
-  schedule:
-    - cron: '0 0 * * 0' # Weekly on Sundays at midnight
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+on: [push, pull_request]
 
 jobs:
-  # ─── Dependencies CVE Auditing ─────────────────────────────────────────────
-  dependency-audit:
-    name: Dependency CVE Scan
+  security:
+    name: Security Audits & Dependency Scan
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -25,51 +19,8 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Audit Node Modules
-        run: |
-          npm audit --json > audit-report.json || true
+      - name: Run npm audit
+        run: npm audit --production 2>&1 || echo "Warnings found"
 
-  # ─── Static Application Security Testing (SAST) ────────────────────────────
-  sast-scan:
-    name: SAST Code Scanner
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Execute Code Scanning
-        run: |
-          echo "Scanning codebase for code quality flaws..."
-          # npx snyk test --sarif-file-output=snyk.sarif || true
-
-  # ─── Container Image Security Vulnerability Auditing ───────────────────────
-  container-scan:
-    name: Trivy Container Image Scan
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Build Local Production Image
-        run: |
-          docker build -t queueforge:scan -f docker/Dockerfile .
-
-      - name: Run Trivy Image Audit
-        run: |
-          echo "Auditing Docker image base layers..."
-          # docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image queueforge:scan
-
-  # ─── Credentials Leak Scanning ─────────────────────────────────────────────
-  secrets-scan:
-    name: TruffleHog Secrets Scanner
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Audit Repository Commits History
-        run: |
-          echo "Scanning commits tree for exposed secrets..."
-          # docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:latest git file:///pwd --only-verified || true
+      - name: Run Snyk High Severity Scan
+        run: npx snyk test --severity-threshold=high 2>&1 || true

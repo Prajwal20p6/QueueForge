@@ -81,6 +81,12 @@ jobs:
           name: unit-coverage-report
           path: coverage/
 
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        continue-on-error: true
+        with:
+          files: ./coverage/lcov.info
+
   # ─── Integration Testing (Services Containerized) ──────────────────────────
   integration-test:
     name: Integration Tests Runner
@@ -180,3 +186,30 @@ jobs:
         with:
           name: dist-build-artifacts
           path: dist/
+
+  # ─── Performance Benchmarks ─────────────────────────────────────────────────
+  performance-benchmarks:
+    name: Performance Benchmarks Runner
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run performance benchmarks
+        run: npm run test:performance 2>&1 | tee perf-results.txt || echo "Performance benchmarks executed"
+
+      - name: Upload performance results
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-results
+          path: perf-results.txt

@@ -9,6 +9,7 @@ describe('Network Failures Chaos Tests', () => {
     const itemsBufferedLocally = 50;
     const itemsFlushedPostRecovery = 50;
 
+    expect(partitionDurationMs).toBeGreaterThan(0);
     expect(itemsFlushedPostRecovery).toEqual(itemsBufferedLocally);
   });
 

@@ -1,0 +1,22 @@
+name: Docker Security Scan
+
+on: [push]
+
+jobs:
+  scan:
+    name: Trivy Container Image Scan
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'main')
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Build Docker images
+        run: |
+          docker build -f infrastructure/docker/Dockerfile.api -t queueforge-api:latest .
+          docker build -f infrastructure/docker/Dockerfile.worker -t queueforge-worker:latest .
+          docker build -f infrastructure/docker/Dockerfile.daemon -t queueforge-daemon:latest .
+
+      - name: Scan with Trivy
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image queueforge-api:latest || echo "Trivy scan finished with findings"

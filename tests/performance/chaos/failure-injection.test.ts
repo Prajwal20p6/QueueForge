@@ -4,15 +4,15 @@
  */
 
 export class FailureInjector {
-  public injectNetworkLatency(delayMs: number): void {
+  public injectNetworkLatency(_delayMs: number): void {
     // Simulated network delay injection
   }
 
-  public injectRandomTimeouts(failureRate: number): void {
+  public injectRandomTimeouts(_failureRate: number): void {
     // Simulated timeout injection
   }
 
-  public injectDatabaseErrors(errorRate: number): void {
+  public injectDatabaseErrors(_errorRate: number): void {
     // Simulated DB error injection
   }
 }
